@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33829.357
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlideshowMaker", "SlideshowMaker.csproj", "{4C37ED8A-4845-47E9-A961-E17238DF377E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4C37ED8A-4845-47E9-A961-E17238DF377E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C37ED8A-4845-47E9-A961-E17238DF377E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C37ED8A-4845-47E9-A961-E17238DF377E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C37ED8A-4845-47E9-A961-E17238DF377E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EBC3A44F-BD72-4B15-9BF3-402A8E2091D6}
+	EndGlobalSection
+EndGlobal
