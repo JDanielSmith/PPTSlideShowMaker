@@ -117,7 +117,21 @@ namespace PPTSlideshowMaker
             }
         }
 
-        public void CreateVideo(string filename, int vertResolution = 720)
+        public PPT.Slide AddEndSlide(string title, string subTitle)
+        {
+			var slide = AddSlide();
+
+			SetText(slide.Shapes[1], title);
+			SetText(slide.Shapes[2], subTitle);
+
+			var transition = slide.SlideShowTransition;
+			transition.AdvanceOnClick = Office.MsoTriState.msoTrue;
+			transition.AdvanceOnTime = Office.MsoTriState.msoFalse;
+
+			return slide;
+		}
+
+			public void CreateVideo(string filename, int vertResolution = 720)
         {
             presentation.CreateVideo(filename, UseTimingsAndNarrations: true, DefaultSlideDuration: 5, vertResolution, FramesPerSecond: 30, Quality: 85);
 

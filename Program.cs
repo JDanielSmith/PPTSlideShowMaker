@@ -24,6 +24,8 @@ namespace PPTSlideshowMaker
 			string root = @"C:\Users\JDani\OneDrive\Archive\Pictures\Honeymoon 😘😘😘";
             presentation.AddPictureSlides(Path.Combine(root, "Prague"));
 
+			presentation.AddEndSlide("Copyright © 2023", DateTime.Now.ToString());
+
 			presentation.CreateVideo(Path.Combine(root, "Prague 2016", "Prague 2016.m4v"));
 
             presentation.Close();
