@@ -8,8 +8,8 @@ presentation.AddTitleSlide("Prague 2016",
 	"Good King Wenceslas\n(Mannheim Steamroller, with members of the\nCzech Philharmonic Orchestra)",
 	@"C:\Users\JDani\Music\iTunes\iTunes Media\Music\Mannheim Steamroller\Christmas Symphony II\10 Good King Wenceslas.m4a");
 
-string root = @"C:\Users\JDani\OneDrive\Archive\Pictures\Honeymoon 😘😘😘";
-presentation.AddPictureSlides(Path.Combine(root, "Prague"));
+string root = @"E:\Users\JDani\OneDrive\Archive\Videos";
+presentation.AddPictureSlides(Path.Combine(root, "Prague 2016"));
 
 presentation.AddEndSlide("Copyright © 2023\nJ. Daniel Smith", DateTime.Now.ToString());
 

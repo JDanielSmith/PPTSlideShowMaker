@@ -1,4 +1,5 @@
-﻿using Office = Microsoft.Office.Core;
+﻿using Microsoft.Office.Interop.PowerPoint;
+using Office = Microsoft.Office.Core;
 using PPT = Microsoft.Office.Interop.PowerPoint;
 
 internal class Presentation
@@ -53,6 +54,24 @@ internal class Presentation
 	public TimeSpan TitleAdvanceTime { get; init; } = TimeSpan.FromSeconds(4.0);
 
 	TimeSpan mediaLegnth = TimeSpan.Zero;
+
+	static string GetTargetPath(string lnkPath)
+	{
+		var shell = new IWshRuntimeLibrary.WshShell();
+		dynamic shortcut = shell.CreateShortcut(lnkPath);
+		return shortcut.TargetPath;
+	}
+
+	static string ResolveShortcut(string path)
+	{
+		var extension = System.IO.Path.GetExtension(path);
+		if (String.Equals(extension, ".lnk", StringComparison.InvariantCultureIgnoreCase))
+		{
+			return GetTargetPath(path);
+		}
+		return path;
+	}
+
 	public PPT.Slide AddTitleSlide(string title, string subTitle, string backgroundMusicPathname)
 	{
 		var slide = AddSlide();
@@ -61,9 +80,10 @@ internal class Presentation
 		SetText(slide.Shapes[1], title);
 		SetText(slide.Shapes[2], subTitle);
 
+
 		var linkToFile = Office.MsoTriState.msoTrue;
 		var saveWithDocument = Office.MsoTriState.msoFalse;
-		var shape = slide.Shapes.AddMediaObject2(backgroundMusicPathname, linkToFile, saveWithDocument);
+		var shape = slide.Shapes.AddMediaObject2(ResolveShortcut(backgroundMusicPathname), linkToFile, saveWithDocument);
 
 		mediaLegnth = TimeSpan.FromMilliseconds(shape.MediaFormat.Length);
 
@@ -79,15 +99,43 @@ internal class Presentation
 		return slide;
 	}
 
+
+	static PPT.Shape AddPicture(PPT.Shapes shapes, string fileName)
+	{
+		fileName = ResolveShortcut(fileName);
+		try
+		{
+			using var image = System.Drawing.Image.FromFile(fileName);
+		}
+		catch (OutOfMemoryException)		
+		{
+			return null;
+		}
+
+		var linkToFile = Office.MsoTriState.msoTrue;
+		var saveWithDocument = Office.MsoTriState.msoFalse;
+		try
+		{
+			return shapes.AddPicture(ResolveShortcut(fileName), linkToFile, saveWithDocument, Left: 0, Top: 0);
+		}
+		catch (System.Runtime.InteropServices.COMException)
+		{
+			return null;
+		}
+	}
+
 	public PPT.Slide AddPictureSlide(string filename, int index = -1)
 	{
 		var slide = AddSlide();
 		DeleteAllShapes(slide);
 		slide.SlideShowTransition.AdvanceTime = slideAdvanceTime;
 
-		var linkToFile = Office.MsoTriState.msoTrue;
-		var saveWithDocument = Office.MsoTriState.msoFalse;
-		var shape = slide.Shapes.AddPicture(filename, linkToFile, saveWithDocument, Left: 0, Top: 0);
+		var shape = AddPicture(slide.Shapes, filename);
+		if (shape == null)
+		{
+			slide.Delete();
+			return null;
+		}
 
 		// center the picture
 		shape.Top = (master.Height - shape.Height) / 2;
