@@ -13,7 +13,7 @@ internal class Presentation
 		layout = master.CustomLayouts[1];
 	}
 
-	public TimeSpan TransitionDuration { get; set; } = TimeSpan.FromSeconds(1);
+	public TimeSpan TransitionDuration { get; init; } = TimeSpan.FromSeconds(1);
 
 	static void DeleteAllShapes(PPT.Slide slide)
 	{
@@ -22,6 +22,8 @@ internal class Presentation
 			slide.Shapes[1].Delete();
 		}
 	}
+
+	public PPT.PpEntryEffect TransitionEntryEffect { get; init; } = PPT.PpEntryEffect.ppEffectRandom;
 
 	PPT.Slide AddSlide(int index = -1)
 	{
@@ -33,7 +35,7 @@ internal class Presentation
 		slide.ColorScheme[PPT.PpColorSchemeIndex.ppBackground].RGB = Int32.MinValue; // Black
 
 		var transition = slide.SlideShowTransition;
-		transition.EntryEffect = PPT.PpEntryEffect.ppEffectRandom;
+		transition.EntryEffect = TransitionEntryEffect;
 		transition.Duration = (float) TransitionDuration.TotalSeconds;
 		transition.AdvanceOnClick = Office.MsoTriState.msoFalse;
 		transition.AdvanceOnTime = Office.MsoTriState.msoTrue;
@@ -48,9 +50,9 @@ internal class Presentation
 		textRange.Font.Color.RGB = Int32.MaxValue; // White
 	}
 
-	public TimeSpan TitleAdvanceTime { get; set; } = TimeSpan.FromSeconds(3.0);
+	public TimeSpan TitleAdvanceTime { get; init; } = TimeSpan.FromSeconds(4.0);
 
-	TimeSpan MediaLegnth { get; set; } = TimeSpan.Zero;
+	TimeSpan mediaLegnth = TimeSpan.Zero;
 	public PPT.Slide AddTitleSlide(string title, string subTitle, string backgroundMusicPathname)
 	{
 		var slide = AddSlide();
@@ -63,7 +65,7 @@ internal class Presentation
 		var saveWithDocument = Office.MsoTriState.msoFalse;
 		var shape = slide.Shapes.AddMediaObject2(backgroundMusicPathname, linkToFile, saveWithDocument);
 
-		MediaLegnth = TimeSpan.FromMilliseconds(shape.MediaFormat.Length);
+		mediaLegnth = TimeSpan.FromMilliseconds(shape.MediaFormat.Length);
 
 		// https://learn.microsoft.com/en-us/office/vba/api/powerpoint.playsettings
 		var animationSettings = shape.AnimationSettings;
@@ -100,11 +102,11 @@ internal class Presentation
 		var files = Directory.GetFiles(path);
 
 		int slides = files.Length;
-		var pictureSlidesTime = MediaLegnth - (TitleAdvanceTime + TransitionDuration);
+		var pictureSlidesTime = mediaLegnth - (TitleAdvanceTime + TransitionDuration);
 		var pictureSlideTime = (pictureSlidesTime / slides) - TransitionDuration;
 		slideAdvanceTime = (float)pictureSlideTime.TotalSeconds;
 
-		int count = 0;
+		int count = 0; // During development, it can be convenient to stop after just a few pictures
 		foreach (string file in files)
 		{
 			AddPictureSlide(file);
@@ -128,7 +130,7 @@ internal class Presentation
 		return slide;
 	}
 
-		public void CreateVideo(string fileName, int vertResolution = 720)
+	public void CreateVideo(string fileName, int vertResolution = 720)
 	{
 		presentation.CreateVideo(fileName, UseTimingsAndNarrations: true, DefaultSlideDuration: 5, vertResolution, FramesPerSecond: 30, Quality: 85);
 

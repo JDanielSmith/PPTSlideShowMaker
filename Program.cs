@@ -5,9 +5,8 @@ var application = new Microsoft.Office.Interop.PowerPoint.Application();
 var presentation = new Presentation(application.Presentations.Add());
 
 presentation.AddTitleSlide("Prague 2016",
-	"Good King Wenceslas\n(Mannheim Steamroller, with members of the Czech Philharmonic Orchestra)",
+	"Good King Wenceslas\n(Mannheim Steamroller, with members of the\nCzech Philharmonic Orchestra)",
 	@"C:\Users\JDani\Music\iTunes\iTunes Media\Music\Mannheim Steamroller\Christmas Symphony II\10 Good King Wenceslas.m4a");
-presentation.TitleAdvanceTime = TimeSpan.FromSeconds(5.0);
 
 string root = @"C:\Users\JDani\OneDrive\Archive\Pictures\Honeymoon 😘😘😘";
 presentation.AddPictureSlides(Path.Combine(root, "Prague"));
