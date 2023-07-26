@@ -62,7 +62,7 @@ internal class Presentation
 		return shortcut.TargetPath;
 	}
 
-	static string ResolveShortcut(string path)
+	static string ResolveShortcut_(string path)
 	{
 		var extension = System.IO.Path.GetExtension(path);
 		if (String.Equals(extension, ".lnk", StringComparison.InvariantCultureIgnoreCase))
@@ -70,6 +70,15 @@ internal class Presentation
 			return GetTargetPath(path);
 		}
 		return path;
+	}
+	static string ResolveShortcut(string path)
+	{
+		var retval = ResolveShortcut_(path);
+		if (!File.Exists(retval))
+		{
+			throw new FileNotFoundException(retval);
+		}
+		return retval;
 	}
 
 	public PPT.Slide AddTitleSlide(string title, string subTitle, string backgroundMusicPathname)
