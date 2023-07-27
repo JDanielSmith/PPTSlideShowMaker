@@ -154,9 +154,9 @@ internal class Presentation
 	}
 
 	float slideAdvanceTime;
-	public void AddPictureSlides(string path)
+	public void AddPictureSlides(DirectoryInfo path)
 	{
-		var files = Directory.GetFiles(path);
+		var files = path.GetFiles();
 
 		int slides = files.Length;
 		var pictureSlidesTime = mediaLegnth - (TitleAdvanceTime + TransitionDuration);
@@ -164,9 +164,9 @@ internal class Presentation
 		slideAdvanceTime = (float)pictureSlideTime.TotalSeconds;
 
 		int count = 0; // During development, it can be convenient to stop after just a few pictures
-		foreach (string file in files)
+		foreach (var file in files)
 		{
-			AddPictureSlide(file);
+			AddPictureSlide(file.FullName);
 
 			count++;
 			if (count > slides) break;

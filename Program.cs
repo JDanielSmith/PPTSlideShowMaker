@@ -21,7 +21,7 @@ var rootDirectory = new DirectoryInfo(@"E:\Users\JDani\OneDrive\Archive\Videos\P
 AddTitleSlide(presentation, rootDirectory, "10 Good King Wenceslas - Shortcut.lnk",
 	"Good King Wenceslas\n(Mannheim Steamroller, with members of the\nCzech Philharmonic Orchestra)");	
 
-presentation.AddPictureSlides(rootDirectory.FullName);
+presentation.AddPictureSlides(rootDirectory);
 presentation.AddEndSlide("Copyright © 2023\nJ. Daniel Smith", DateTime.Now.ToString());
 
 CreateVideo(presentation, rootDirectory);
