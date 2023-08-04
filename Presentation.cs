@@ -2,7 +2,7 @@
 using Office = Microsoft.Office.Core;
 using PPT = Microsoft.Office.Interop.PowerPoint;
 
-internal class Presentation
+internal sealed class Presentation
 {
 	readonly PPT.Presentation presentation;
 	readonly PPT.Master master;
@@ -55,32 +55,6 @@ internal class Presentation
 
 	TimeSpan mediaLegnth = TimeSpan.Zero;
 
-	static string GetTargetPath(string lnkPath)
-	{
-		var shell = new IWshRuntimeLibrary.WshShell();
-		dynamic shortcut = shell.CreateShortcut(lnkPath);
-		return shortcut.TargetPath;
-	}
-
-	static string ResolveShortcut_(string path)
-	{
-		var extension = System.IO.Path.GetExtension(path);
-		if (String.Equals(extension, ".lnk", StringComparison.InvariantCultureIgnoreCase))
-		{
-			return GetTargetPath(path);
-		}
-		return path;
-	}
-	static string ResolveShortcut(string path)
-	{
-		var retval = ResolveShortcut_(path);
-		if (!File.Exists(retval))
-		{
-			throw new FileNotFoundException(retval);
-		}
-		return retval;
-	}
-
 	public PPT.Slide AddTitleSlide(string title, string subTitle, string backgroundMusicPathname)
 	{
 		var slide = AddSlide();
@@ -92,7 +66,7 @@ internal class Presentation
 
 		var linkToFile = Office.MsoTriState.msoTrue;
 		var saveWithDocument = Office.MsoTriState.msoFalse;
-		var shape = slide.Shapes.AddMediaObject2(ResolveShortcut(backgroundMusicPathname), linkToFile, saveWithDocument);
+		var shape = slide.Shapes.AddMediaObject2(Shortcut.Resolve(backgroundMusicPathname), linkToFile, saveWithDocument);
 
 		mediaLegnth = TimeSpan.FromMilliseconds(shape.MediaFormat.Length);
 
@@ -111,7 +85,7 @@ internal class Presentation
 
 	static PPT.Shape AddPicture(PPT.Shapes shapes, string fileName)
 	{
-		fileName = ResolveShortcut(fileName);
+		fileName = Shortcut.Resolve(fileName);
 		try
 		{
 			using var image = System.Drawing.Image.FromFile(fileName);
@@ -125,7 +99,7 @@ internal class Presentation
 		var saveWithDocument = Office.MsoTriState.msoFalse;
 		try
 		{
-			return shapes.AddPicture(ResolveShortcut(fileName), linkToFile, saveWithDocument, Left: 0, Top: 0);
+			return shapes.AddPicture(Shortcut.Resolve(fileName), linkToFile, saveWithDocument, Left: 0, Top: 0);
 		}
 		catch (System.Runtime.InteropServices.COMException)
 		{
