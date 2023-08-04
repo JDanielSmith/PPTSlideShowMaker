@@ -16,32 +16,14 @@ internal sealed class Presentation
 
 	public TimeSpan TransitionDuration { get; init; } = TimeSpan.FromSeconds(1);
 
-	static void DeleteAllShapes(PPT.Slide slide)
+	public PPT.PpEntryEffect TransitionEntryEffect
 	{
-		while (slide.Shapes.Count > 0)
-		{
-			slide.Shapes[1].Delete();
-		}
+		set { Slides.TransitionEntryEffect = value; }
 	}
-
-	public PPT.PpEntryEffect TransitionEntryEffect { get; init; } = PPT.PpEntryEffect.ppEffectRandom;
 
 	PPT.Slide AddSlide(int index = -1)
 	{
-		if (index < 0)
-		{
-			index = presentation.Slides.Count + 1;
-		}
-		var slide = presentation.Slides.AddSlide(index, layout);
-		slide.ColorScheme[PPT.PpColorSchemeIndex.ppBackground].RGB = Int32.MinValue; // Black
-
-		var transition = slide.SlideShowTransition;
-		transition.EntryEffect = TransitionEntryEffect;
-		transition.Duration = (float) TransitionDuration.TotalSeconds;
-		transition.AdvanceOnClick = Office.MsoTriState.msoFalse;
-		transition.AdvanceOnTime = Office.MsoTriState.msoTrue;
-
-		return slide;
+		return Slides.AddSlide(presentation, TransitionDuration, index);
 	}
 
 	static void SetText(PPT.Shape shape, string text)
@@ -53,7 +35,7 @@ internal sealed class Presentation
 
 	public TimeSpan TitleAdvanceTime { get; init; } = TimeSpan.FromSeconds(4.0);
 
-	TimeSpan mediaLegnth = TimeSpan.Zero;
+	TimeSpan mediaLength = TimeSpan.Zero;
 
 	public PPT.Slide AddTitleSlide(string title, string subTitle, string backgroundMusicPathname)
 	{
@@ -63,57 +45,19 @@ internal sealed class Presentation
 		SetText(slide.Shapes[1], title);
 		SetText(slide.Shapes[2], subTitle);
 
-
-		var linkToFile = Office.MsoTriState.msoTrue;
-		var saveWithDocument = Office.MsoTriState.msoFalse;
-		var shape = slide.Shapes.AddMediaObject2(Shortcut.Resolve(backgroundMusicPathname), linkToFile, saveWithDocument);
-
-		mediaLegnth = TimeSpan.FromMilliseconds(shape.MediaFormat.Length);
-
-		// https://learn.microsoft.com/en-us/office/vba/api/powerpoint.playsettings
-		var animationSettings = shape.AnimationSettings;
-		animationSettings.AdvanceMode = PPT.PpAdvanceMode.ppAdvanceOnTime;
-		var playSettings = animationSettings.PlaySettings;
-		playSettings.PlayOnEntry = Office.MsoTriState.msoTrue;
-		playSettings.PauseAnimation = Office.MsoTriState.msoFalse;
-		playSettings.HideWhileNotPlaying = Office.MsoTriState.msoTrue;
-		playSettings.StopAfterSlides = Int32.MaxValue;
+		mediaLength = Shapes.AddMediaObject2(slide.Shapes, Shortcut.Resolve(backgroundMusicPathname));
 
 		return slide;
 	}
 
 
-	static PPT.Shape AddPicture(PPT.Shapes shapes, string fileName)
-	{
-		fileName = Shortcut.Resolve(fileName);
-		try
-		{
-			using var image = System.Drawing.Image.FromFile(fileName);
-		}
-		catch (OutOfMemoryException)		
-		{
-			return null;
-		}
-
-		var linkToFile = Office.MsoTriState.msoTrue;
-		var saveWithDocument = Office.MsoTriState.msoFalse;
-		try
-		{
-			return shapes.AddPicture(Shortcut.Resolve(fileName), linkToFile, saveWithDocument, Left: 0, Top: 0);
-		}
-		catch (System.Runtime.InteropServices.COMException)
-		{
-			return null;
-		}
-	}
-
-	public PPT.Slide AddPictureSlide(string filename, int index = -1)
+	public PPT.Slide AddPictureSlide(string fileName, int index = -1)
 	{
 		var slide = AddSlide();
-		DeleteAllShapes(slide);
+		Shapes.DeleteAll(slide.Shapes);
 		slide.SlideShowTransition.AdvanceTime = slideAdvanceTime;
 
-		var shape = AddPicture(slide.Shapes, filename);
+		var shape = Shapes.AddPicture(slide.Shapes, Shortcut.Resolve(fileName));
 		if (shape == null)
 		{
 			slide.Delete();
@@ -133,7 +77,7 @@ internal sealed class Presentation
 		var files = path.GetFiles();
 
 		int slides = files.Length;
-		var pictureSlidesTime = mediaLegnth - (TitleAdvanceTime + TransitionDuration);
+		var pictureSlidesTime = mediaLength - (TitleAdvanceTime + TransitionDuration);
 		var pictureSlideTime = (pictureSlidesTime / slides) - TransitionDuration;
 		slideAdvanceTime = (float)pictureSlideTime.TotalSeconds;
 
