@@ -6,15 +6,13 @@ internal sealed class Presentation
 {
 	readonly PPT.Presentation presentation;
 	readonly PPT.Master master;
-	readonly PPT.CustomLayout layout;
 	public Presentation(PPT.Presentation presentation)
 	{
 		this.presentation = presentation;
 		master = this.presentation.SlideMaster;
-		layout = master.CustomLayouts[1];
 	}
 
-	public TimeSpan TransitionDuration { get; init; } = TimeSpan.FromSeconds(1);
+	public TimeSpan TransitionDuration { get; init; } = TimeSpan.FromSeconds(0.85);
 
 	public PPT.PpEntryEffect TransitionEntryEffect
 	{
@@ -35,23 +33,28 @@ internal sealed class Presentation
 
 	public TimeSpan TitleAdvanceTime { get; init; } = TimeSpan.FromSeconds(4.0);
 
-	TimeSpan mediaLength = TimeSpan.Zero;
+	TimeSpan mediaLength = TimeSpan.FromMinutes(2.5); // in case there isn't any background music
 
-	public PPT.Slide AddTitleSlide(string title, string subTitle, string backgroundMusicPathname)
+	public PPT.Slide AddTitleSlide(string title, string? subTitle, string? backgroundMusicPathname)
 	{
 		var slide = AddSlide();
 		slide.SlideShowTransition.AdvanceTime = (float)TitleAdvanceTime.TotalSeconds;
 
 		SetText(slide.Shapes[1], title);
-		SetText(slide.Shapes[2], subTitle);
+		if (subTitle is not null)
+		{
+			SetText(slide.Shapes[2], subTitle);
+		}
 
-		mediaLength = Shapes.AddMediaObject2(slide.Shapes, Shortcut.Resolve(backgroundMusicPathname));
+		if (backgroundMusicPathname is not null)
+		{
+			mediaLength = Shapes.AddMediaObject2(slide.Shapes, Shortcut.Resolve(backgroundMusicPathname));
+		}
 
 		return slide;
 	}
 
-
-	public PPT.Slide AddPictureSlide(string fileName, int index = -1)
+	public PPT.Slide? AddPictureSlide(string fileName, int index = -1)
 	{
 		var slide = AddSlide();
 		Shapes.DeleteAll(slide.Shapes);
@@ -91,12 +94,18 @@ internal sealed class Presentation
 		}
 	}
 
-	public PPT.Slide AddEndSlide(string title, string subTitle)
+	public PPT.Slide AddEndSlide(string? title, string? subTitle)
 	{
 		var slide = AddSlide();
 
-		SetText(slide.Shapes[1], title);
-		SetText(slide.Shapes[2], subTitle);
+		if (title is not null)
+		{
+			SetText(slide.Shapes[1], title);
+			if (subTitle is not null)
+			{
+				SetText(slide.Shapes[2], subTitle);
+			}
+		}
 
 		var transition = slide.SlideShowTransition;
 		transition.AdvanceOnClick = Office.MsoTriState.msoTrue;
@@ -107,9 +116,10 @@ internal sealed class Presentation
 
 	public void CreateVideo(string fileName, int vertResolution = 720)
 	{
-		presentation.CreateVideo(fileName, UseTimingsAndNarrations: true, DefaultSlideDuration: 5, vertResolution, FramesPerSecond: 30, Quality: 85);
+		// Don't need a high frame-rate as these are still photos.
+		presentation.CreateVideo(fileName, UseTimingsAndNarrations: true, DefaultSlideDuration: 5, vertResolution, FramesPerSecond: 7, Quality: 90);
 
-		// Yes, this is LAME ... but it's easy and works.
+		// Yes, this is LAME ... but it's easy and "works."
 		while (true)
 		{
 			var status = presentation.CreateVideoStatus;

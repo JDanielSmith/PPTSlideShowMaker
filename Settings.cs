@@ -7,7 +7,7 @@ internal sealed class Settings
 {
 	public string? BackgroundMusicPath { get; set; }
 
-	//public string? Title { get; set; }
+	public string? Title { get; set; }
 	public string? SubTitle { get; set; }
 
 	public string? EndTitle { get; set; }

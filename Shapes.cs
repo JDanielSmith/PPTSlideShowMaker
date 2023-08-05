@@ -32,8 +32,10 @@ internal static class Shapes
 		return mediaLength;
 	}
 
-	public static PPT.Shape AddPicture(PPT.Shapes shapes, string fileName)
+	public static PPT.Shape? AddPicture(PPT.Shapes shapes, string fileName)
 	{
+		// PPT will take just about anything as an "image," try to ensure
+		// we only add actual images.
 		try
 		{
 			using var image = System.Drawing.Image.FromFile(fileName);

@@ -13,18 +13,15 @@ internal static class Shortcut
 		dynamic shortcut = shell.CreateShortcut(lnkPath);
 		return shortcut.TargetPath;
 	}
-	static string Resolve_(string path)
+
+	public static bool IsShortcut(string path)
 	{
 		var extension = Path.GetExtension(path);
-		if (String.Equals(extension, ".lnk", StringComparison.InvariantCultureIgnoreCase))
-		{
-			return GetTargetPath(path);
-		}
-		return path;
+		return String.Equals(extension, ".lnk", StringComparison.InvariantCultureIgnoreCase);
 	}
 	public static string Resolve(string path)
 	{
-		var retval = Resolve_(path);
+		var retval = IsShortcut(path) ? GetTargetPath(path) : path;
 		if (!File.Exists(retval))
 		{
 			throw new FileNotFoundException(retval);

@@ -27,12 +27,22 @@ static void AddTitleSlide_(Presentation presentation, DirectoryInfo directoryInf
 }
 static void AddTitleSlide(Presentation presentation, DirectoryInfo directoryInfo, Settings settings)
 {
-	AddTitleSlide_(presentation, directoryInfo, settings.BackgroundMusicPath!, settings.SubTitle!);
+	var backgroundMusicPath = settings.BackgroundMusicPath;
+	if (backgroundMusicPath is not null)
+	{
+		if (!File.Exists(backgroundMusicPath))
+		{
+			backgroundMusicPath = Combine(directoryInfo, backgroundMusicPath);
+		}
+	}
+
+	string title = settings.Title ?? directoryInfo.Name;
+	presentation.AddTitleSlide(title, settings.SubTitle, backgroundMusicPath);
 }
 
 static void AddEndSlide(Presentation presentation, Settings settings)
 {
-	presentation.AddEndSlide(settings.EndTitle!, settings.Copyright!);
+	presentation.AddEndSlide(settings.EndTitle, settings.Copyright);
 }
 static void CreateVideo(Presentation presentation, DirectoryInfo directoryInfo)
 {
