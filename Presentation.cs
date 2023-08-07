@@ -117,7 +117,7 @@ internal sealed class Presentation
 	public void CreateVideo(string fileName, int vertResolution = 720)
 	{
 		// Don't need a high frame-rate as these are still photos.
-		presentation.CreateVideo(fileName, UseTimingsAndNarrations: true, DefaultSlideDuration: 5, vertResolution, FramesPerSecond: 7, Quality: 90);
+		presentation.CreateVideo(fileName, UseTimingsAndNarrations: true, DefaultSlideDuration: 5, vertResolution, FramesPerSecond: 7, Quality: 80);
 
 		// Yes, this is LAME ... but it's easy and "works."
 		while (true)

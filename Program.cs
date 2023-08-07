@@ -14,17 +14,6 @@ static Settings ReadSettings(DirectoryInfo rootDirectory)
 	return JsonSerializer.Deserialize<Settings>(jsonString)!;
 
 }
-static void AddTitleSlide_(Presentation presentation, DirectoryInfo directoryInfo, string backgroundMusic,
-	string subTitle)
-{
-	var backgroundMusicPath = backgroundMusic;
-	if (!File.Exists(backgroundMusicPath))
-	{
-		backgroundMusicPath = Combine(directoryInfo, backgroundMusic);
-	}
-
-	presentation.AddTitleSlide(directoryInfo.Name, subTitle, backgroundMusicPath);
-}
 static void AddTitleSlide(Presentation presentation, DirectoryInfo directoryInfo, Settings settings)
 {
 	var backgroundMusicPath = settings.BackgroundMusicPath;
@@ -55,13 +44,8 @@ var settings = ReadSettings(rootDirectory);
 
 // https://learn.microsoft.com/en-us/office/vba/api/powerpoint.application.run
 var application = new Microsoft.Office.Interop.PowerPoint.Application();
-//application.Visible = Office.MsoTriState.msoFalse;
-//application.WindowState = PPT.PpWindowState.ppWindowMinimized;
 var presentation = new Presentation(application.Presentations.Add());
 
-
-//AddTitleSlide(presentation, rootDirectory, "10 Good King Wenceslas - Shortcut.lnk",
-//	"Good King Wenceslas\n(Mannheim Steamroller, with members of the\nCzech Philharmonic Orchestra)");	
 AddTitleSlide(presentation, rootDirectory, settings);
 
 presentation.AddPictureSlides(rootDirectory);
