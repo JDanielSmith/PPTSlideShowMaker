@@ -12,13 +12,10 @@ internal static class Slides
 	}
 
 	public static PPT.PpEntryEffect TransitionEntryEffect { get; set; } = PPT.PpEntryEffect.ppEffectRandom;
-	public static PPT.Slide AddSlide(PPT.Presentation presentation, TimeSpan transitionDuration, int index = -1)
+
+	static PPT.Slide AddSlide(PPT.Slides slides, PPT.CustomLayout layout, TimeSpan transitionDuration, int index)
 	{
-		if (index < 0)
-		{
-			index = presentation.Slides.Count + 1;
-		}
-		var slide = presentation.Slides.AddSlide(index, GetLayout(presentation));
+		var slide = slides.AddSlide(index, layout);
 		slide.ColorScheme[PPT.PpColorSchemeIndex.ppBackground].RGB = Int32.MinValue; // Black
 
 		var transition = slide.SlideShowTransition;
@@ -28,6 +25,15 @@ internal static class Slides
 		transition.AdvanceOnTime = Office.MsoTriState.msoTrue;
 
 		return slide;
+	}
+	public static PPT.Slide AddSlide(PPT.Presentation presentation, TimeSpan transitionDuration, int index = -1)
+	{
+		var slides = presentation.Slides;
+		if (index < 0)
+		{
+			index = slides.Count + 1;
+		}
+		return AddSlide(slides, GetLayout(presentation), transitionDuration, index);
 	}
 }
 

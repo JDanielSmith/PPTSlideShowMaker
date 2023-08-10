@@ -33,7 +33,7 @@ internal sealed class Presentation
 
 	public TimeSpan TitleAdvanceTime { get; init; } = TimeSpan.FromSeconds(4.0);
 
-	TimeSpan mediaLength = TimeSpan.FromMinutes(2.5); // in case there isn't any background music
+	public TimeSpan MediaLength { get; set; } = TimeSpan.FromMinutes(2.5); // in case there isn't any background music
 
 	public PPT.Slide AddTitleSlide(string title, string? subTitle, string? backgroundMusicPathname)
 	{
@@ -48,7 +48,7 @@ internal sealed class Presentation
 
 		if (backgroundMusicPathname is not null)
 		{
-			mediaLength = Shapes.AddMediaObject2(slide.Shapes, Shortcut.Resolve(backgroundMusicPathname));
+			MediaLength = Shapes.AddMediaObject2(slide.Shapes, Shortcut.Resolve(backgroundMusicPathname));
 		}
 
 		return slide;
@@ -56,9 +56,9 @@ internal sealed class Presentation
 
 	public PPT.Slide? AddPictureSlide(string fileName, int index = -1)
 	{
-		var slide = AddSlide();
+		var slide = AddSlide(index);
 		Shapes.DeleteAll(slide.Shapes);
-		slide.SlideShowTransition.AdvanceTime = slideAdvanceTime;
+		slide.SlideShowTransition.AdvanceTime = SlideAdvanceTime;
 
 		var shape = Shapes.AddPicture(slide.Shapes, Shortcut.Resolve(fileName));
 		if (shape == null)
@@ -74,37 +74,19 @@ internal sealed class Presentation
 		return slide;
 	}
 
-	float slideAdvanceTime;
-	public void AddPictureSlides(DirectoryInfo path)
+	public float SlideAdvanceTime { get; set; }
+	public PPT.Slide? AddEndSlide(string? title, string? subTitle)
 	{
-		var files = path.GetFiles();
-
-		int slides = files.Length;
-		var pictureSlidesTime = mediaLength - (TitleAdvanceTime + TransitionDuration);
-		var pictureSlideTime = (pictureSlidesTime / slides) - TransitionDuration;
-		slideAdvanceTime = (float)pictureSlideTime.TotalSeconds;
-
-		int count = 0; // During development, it can be convenient to stop after just a few pictures
-		foreach (var file in files)
+		if (title is null)
 		{
-			AddPictureSlide(file.FullName);
-
-			count++;
-			if (count > slides) break;
+			return null;
 		}
-	}
 
-	public PPT.Slide AddEndSlide(string? title, string? subTitle)
-	{
 		var slide = AddSlide();
-
-		if (title is not null)
+		SetText(slide.Shapes[1], title);
+		if (subTitle is not null)
 		{
-			SetText(slide.Shapes[1], title);
-			if (subTitle is not null)
-			{
-				SetText(slide.Shapes[2], subTitle);
-			}
+			SetText(slide.Shapes[2], subTitle);
 		}
 
 		var transition = slide.SlideShowTransition;

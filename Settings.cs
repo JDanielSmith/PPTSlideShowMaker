@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 internal sealed class Settings
 {
+
+	public string? Directory { get; set; }
 	public string? BackgroundMusicPath { get; set; }
 
 	public string? Title { get; set; }
