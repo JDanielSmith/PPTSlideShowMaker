@@ -78,7 +78,8 @@ internal class PPTSlideshowMaker
 	{
 		var backgroundMusicPath = GetBackgroundMusicPath();
 		string title = settings.Title ?? directoryInfo.Name;
-		presentation.AddTitleSlide(title, settings.SubTitle, backgroundMusicPath);
+		var slide = presentation.AddTitleSlide(title, settings.SubTitle, backgroundMusicPath);
+		slide.Export(Combine(directoryInfo, "folder.png"), "PNG");
 
 		return this;
 	}
