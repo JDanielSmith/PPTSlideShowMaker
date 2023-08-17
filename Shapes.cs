@@ -36,11 +36,7 @@ internal static class Shapes
 	{
 		// PPT will take just about anything as an "image," try to ensure
 		// we only add actual images.
-		try
-		{
-			using var image = System.Drawing.Image.FromFile(fileName);
-		}
-		catch (OutOfMemoryException)
+		if (!Drawing.IsImage(fileName))
 		{
 			return null;
 		}

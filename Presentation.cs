@@ -1,4 +1,5 @@
 ﻿using Microsoft.Office.Interop.PowerPoint;
+using System.Runtime.InteropServices;
 using Office = Microsoft.Office.Core;
 using PPT = Microsoft.Office.Interop.PowerPoint;
 
@@ -96,6 +97,18 @@ internal sealed class Presentation
 		return slide;
 	}
 
+	PPT.PpMediaTaskStatus GetCreateVideoStatus()
+	{
+		try
+		{
+			return presentation.CreateVideoStatus;
+		}
+		catch (COMException)
+		{
+			return PPT.PpMediaTaskStatus.ppMediaTaskStatusNone;
+		}
+	}
+
 	public void CreateVideo(string fileName, int vertResolution = 720)
 	{
 		// Don't need a high frame-rate as these are still photos.
@@ -104,7 +117,7 @@ internal sealed class Presentation
 		// Yes, this is LAME ... but it's easy and "works."
 		while (true)
 		{
-			var status = presentation.CreateVideoStatus;
+			var status = GetCreateVideoStatus();
 			if (status is PPT.PpMediaTaskStatus.ppMediaTaskStatusDone or PPT.PpMediaTaskStatus.ppMediaTaskStatusFailed)
 			{
 				break;

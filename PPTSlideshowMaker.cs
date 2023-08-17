@@ -14,6 +14,10 @@ internal class PPTSlideshowMaker
 	readonly Presentation presentation;
 	readonly Settings settings;
 	readonly DirectoryInfo directoryInfo;
+	readonly IList<string> files = new List<string>();
+	readonly string? backgroundMusic;
+
+	static readonly string VideoExtension = ".m4v";
 	public PPTSlideshowMaker(Settings settings)
 	{
 		//application.Visible = Office.MsoTriState.msoFalse;
@@ -23,6 +27,29 @@ internal class PPTSlideshowMaker
 
 		this.settings = settings;
 		directoryInfo = new DirectoryInfo(this.settings.Directory!);
+
+		foreach (var file in directoryInfo.EnumerateFiles())
+		{
+			var path = Shortcut.Resolve(file.FullName);
+			if (Drawing.IsImage(path))
+			{
+				files.Add(path);
+			}
+			else
+			{
+				if (file.Extension.Equals(VideoExtension, StringComparison.OrdinalIgnoreCase) ||
+					file.Extension.Equals(".json", StringComparison.OrdinalIgnoreCase))
+				{
+					/* do nothing */
+				}
+				else
+				{
+					// If the file isn't an image and not the video created from a previous run,
+					// then it must be background music.
+					backgroundMusic = path;
+				}
+			}	
+		}
 	}
 
 	static string Combine(DirectoryInfo rootDirectory, string path)
@@ -30,7 +57,7 @@ internal class PPTSlideshowMaker
 		return Path.Combine(rootDirectory.FullName, path);
 	}
 
-	public PPTSlideshowMaker AddTitleSlide()
+	string? GetBackgroundMusicPath()
 	{
 		var backgroundMusicPath = settings.BackgroundMusicPath;
 		if (backgroundMusicPath is not null)
@@ -40,7 +67,16 @@ internal class PPTSlideshowMaker
 				backgroundMusicPath = Combine(directoryInfo, backgroundMusicPath);
 			}
 		}
+		else if (backgroundMusic is not null)
+		{
+			backgroundMusicPath = backgroundMusic;
+		}
+		return backgroundMusicPath;
+	}
 
+	public PPTSlideshowMaker AddTitleSlide()
+	{
+		var backgroundMusicPath = GetBackgroundMusicPath();
 		string title = settings.Title ?? directoryInfo.Name;
 		presentation.AddTitleSlide(title, settings.SubTitle, backgroundMusicPath);
 
@@ -48,9 +84,7 @@ internal class PPTSlideshowMaker
 	}
 
 	public PPTSlideshowMaker AddPictureSlides()
-	{
-		var files = directoryInfo.EnumerateFiles();
-
+	{		
 		var titleSlideTime = presentation.TitleAdvanceTime + presentation.TransitionDuration;
 		var pictureSlidesTime = presentation.MediaLength - titleSlideTime;
 
@@ -61,7 +95,7 @@ internal class PPTSlideshowMaker
 		int count = 0; // During development, it can be convenient to stop after just a few pictures
 		foreach (var file in files)
 		{
-			presentation.AddPictureSlide(file.FullName);
+			presentation.AddPictureSlide(file);
 
 			count++;
 			if (count > slides) break;
@@ -77,7 +111,7 @@ internal class PPTSlideshowMaker
 	}
 	public PPTSlideshowMaker CreateVideo()
 	{
-		var m4v = directoryInfo.Name + ".m4v";
+		var m4v = directoryInfo.Name + VideoExtension;
 		presentation.CreateVideo(Combine(directoryInfo, m4v));
 		return this;
 	}
