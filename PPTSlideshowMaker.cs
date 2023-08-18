@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,9 +16,44 @@ internal class PPTSlideshowMaker
 	readonly Settings settings;
 	readonly DirectoryInfo directoryInfo;
 	readonly IList<string> files = new List<string>();
-	readonly string? backgroundMusic;
+	string? backgroundMusic;
 
-	static readonly string VideoExtension = ".m4v";
+	const string VideoExtension = @".m4v";
+	const string FolderName = @"folder.png"; // for Plex
+
+	static bool IsImage(string path)
+	{
+		if (!Drawing.IsImage(path))
+		{
+			return false;
+		}
+
+		// Be sure it's not the folder.png file we created in a previous run
+		var filename = Path.GetFileName(path);
+		return !String.Equals(filename, FolderName, StringComparison.OrdinalIgnoreCase);
+	}
+
+	void ProcessFile(FileInfo file)
+	{
+		var path = Shortcut.Resolve(file.FullName);
+		if (IsImage(path))
+		{
+			files.Add(path);
+			return;
+		}
+		if (file.Extension.Equals(VideoExtension, StringComparison.OrdinalIgnoreCase) ||
+			file.Extension.Equals(".json", StringComparison.OrdinalIgnoreCase))
+		{
+			return;
+		}
+
+		// If the file isn't an image and not the video created from a previous run,
+		// then it must be background music.
+		if (!Drawing.IsImage(path))
+		{
+			backgroundMusic = path;
+		}
+	}
 	public PPTSlideshowMaker(Settings settings)
 	{
 		//application.Visible = Office.MsoTriState.msoFalse;
@@ -30,25 +66,7 @@ internal class PPTSlideshowMaker
 
 		foreach (var file in directoryInfo.EnumerateFiles())
 		{
-			var path = Shortcut.Resolve(file.FullName);
-			if (Drawing.IsImage(path))
-			{
-				files.Add(path);
-			}
-			else
-			{
-				if (file.Extension.Equals(VideoExtension, StringComparison.OrdinalIgnoreCase) ||
-					file.Extension.Equals(".json", StringComparison.OrdinalIgnoreCase))
-				{
-					/* do nothing */
-				}
-				else
-				{
-					// If the file isn't an image and not the video created from a previous run,
-					// then it must be background music.
-					backgroundMusic = path;
-				}
-			}	
+			ProcessFile(file);
 		}
 	}
 
@@ -74,12 +92,16 @@ internal class PPTSlideshowMaker
 		return backgroundMusicPath;
 	}
 
+	FileInfo? FolderPNG {  get; set; }
 	public PPTSlideshowMaker AddTitleSlide()
 	{
 		var backgroundMusicPath = GetBackgroundMusicPath();
 		string title = settings.Title ?? directoryInfo.Name;
 		var slide = presentation.AddTitleSlide(title, settings.SubTitle, backgroundMusicPath);
-		slide.Export(Combine(directoryInfo, "folder.png"), "PNG");
+
+		// "folder.png" for Plex
+		FolderPNG = new FileInfo(Combine(directoryInfo, FolderName));
+		slide.Export(FolderPNG.FullName, "PNG");
 
 		return this;
 	}
@@ -110,10 +132,18 @@ internal class PPTSlideshowMaker
 		presentation.AddEndSlide(settings.EndTitle, settings.Copyright);
 		return this;
 	}
+
 	public PPTSlideshowMaker CreateVideo()
 	{
 		var m4v = directoryInfo.Name + VideoExtension;
-		presentation.CreateVideo(Combine(directoryInfo, m4v));
+		var path = Combine(directoryInfo, m4v);
+		presentation.CreateVideo(path);
+
+		if (FolderPNG is not null)
+		{
+			TagEditor.AddCover(path, FolderPNG!);
+		}
+		
 		return this;
 	}
 
