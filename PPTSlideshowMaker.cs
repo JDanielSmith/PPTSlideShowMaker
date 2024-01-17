@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Office.Interop.PowerPoint;
-using Office = Microsoft.Office.Core;
-using PPT = Microsoft.Office.Interop.PowerPoint;
+﻿using PPT = Microsoft.Office.Interop.PowerPoint;
 
 internal class PPTSlideshowMaker
 {

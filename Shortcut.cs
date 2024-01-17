@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-internal static class Shortcut
+﻿internal static class Shortcut
 {
-
 	static string GetTargetPath(string lnkPath)
 	{
 		var shell = new IWshRuntimeLibrary.WshShell();

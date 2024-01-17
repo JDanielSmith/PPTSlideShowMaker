@@ -1,5 +1,4 @@
-﻿using Microsoft.Office.Interop.PowerPoint;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using Office = Microsoft.Office.Core;
 using PPT = Microsoft.Office.Interop.PowerPoint;
 

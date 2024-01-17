@@ -1,5 +1,4 @@
-﻿using Microsoft.Office.Interop.PowerPoint;
-using Office = Microsoft.Office.Core;
+﻿using Office = Microsoft.Office.Core;
 using PPT = Microsoft.Office.Interop.PowerPoint;
 
 internal static class Slides
